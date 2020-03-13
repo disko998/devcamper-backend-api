@@ -69,7 +69,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 }
 
 // @desc    Get user by auth token
-// @route   GET /api/v1/auth/register
+// @route   GET /api/v1/auth/me
 // @access  Private
 exports.getMe = AsyncHandler(async (req, res, next) => {
     const user = await User.findById(req.user.id)
