@@ -11,21 +11,16 @@ exports.getCourses = AsyncHandler(async (req, res, next) => {
     let query
 
     if (req.params.bootcampId) {
-        query = Courses.find({ bootcamp: req.params.bootcampId })
-    } else {
-        query = Courses.find().populate({
-            path: 'bootcamp',
-            select: 'name description',
+        const courses = await Courses.find({ bootcamp: req.params.bootcampId })
+
+        return res.status(200).json({
+            success: true,
+            count: courses.length,
+            data: courses,
         })
+    } else {
+        res.status(200).json(res.advanceResults)
     }
-
-    const courses = await query
-
-    res.status(200).json({
-        success: true,
-        count: courses.length,
-        data: courses,
-    })
 })
 
 // @desc        Get single course
@@ -56,7 +51,12 @@ exports.addCourse = AsyncHandler(async (req, res, next) => {
     const bootcamp = await Bootcamp.findById(req.params.bootcampId)
 
     if (!bootcamp) {
-        return next(new ErrorResponse(`Bootcamp with the id of ${req.params.bootcampId} not found`), 404)
+        return next(
+            new ErrorResponse(
+                `Bootcamp with the id of ${req.params.bootcampId} not found`,
+            ),
+            404,
+        )
     }
 
     const course = await Courses.create(req.body)
@@ -71,7 +71,10 @@ exports.addCourse = AsyncHandler(async (req, res, next) => {
 // @route       PUT / api/v1/courses/:id
 // @access      Private
 exports.updateCourse = AsyncHandler(async (req, res, next) => {
-    const course = await Courses.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+    const course = await Courses.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true,
+    })
 
     if (!course) {
         return next(new ErrorResponse(`No course with the id of ${req.params.id}`), 404)
